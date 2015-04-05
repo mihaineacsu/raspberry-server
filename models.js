@@ -4,8 +4,8 @@ var mongoose = require('mongoose'),
 	async = require('async');
 
 console.log('hmm:');
-console.log(config.get('MONGOLAB_URL'));
-var connection = mongoose.createConnection(config.get('MONGOLAB_URL'));
+console.log(config.get('MONGOLAB_URI'));
+var connection = mongoose.createConnection(config.get('MONGOLAB_URI'));
 
 autoIncrement.initialize(connection);
 

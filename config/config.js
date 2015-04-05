@@ -3,7 +3,7 @@ var nconf = require('nconf');
 nconf.argv().env();
 
 nconf.defaults({
-    'MONGOLAB_URL': 'mongodb://localhost/Rasberry',
+    'MONGOLAB_URI': 'mongodb://localhost/Rasberry',
 	'PORT': 8000,
 });
 
