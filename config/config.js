@@ -7,6 +7,4 @@ nconf.defaults({
 	'PORT': 8000,
 });
 
-console.log(nconf);
-
 module.exports = nconf;
