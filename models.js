@@ -3,8 +3,6 @@ var mongoose = require('mongoose'),
 	config = require('./config/config'),
 	async = require('async');
 
-console.log('hmm:');
-console.log(config.get('MONGOLAB_URI'));
 var connection = mongoose.createConnection(config.get('MONGOLAB_URI'));
 
 autoIncrement.initialize(connection);
@@ -179,5 +177,5 @@ module.exports = {
 				 State: connection.model('State', stateSchema),
 				 Event: connection.model('Event', eventSchema),
 				 Heartbeat: connection.model('Heartbeat', heartbeatSchema),
-				 SpeedTests: connection.model('SpeedTest', speedTestSchema)
+				 SpeedTest: connection.model('SpeedTest', speedTestSchema)
 				};

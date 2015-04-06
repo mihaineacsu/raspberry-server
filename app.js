@@ -27,5 +27,4 @@ app.use(function(err, req, res, next) {
 	return res.send(err);
 });
 
-console.log(config.get('PORT'));
 app.listen(config.get('PORT'));

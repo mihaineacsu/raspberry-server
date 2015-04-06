@@ -9,7 +9,7 @@ var router = express.Router(),
     State = models.State,
     Event = models.Event,
     Heartbeat = models.Heartbeat,
-    SpeedTests = models.SpeedTests;
+    SpeedTest = models.SpeedTest;
 
 /*
  * Error object that will contain all the missing parameters
@@ -152,6 +152,7 @@ router.post('/heartbeat', function(req, res, errCallback){
                 if (err)
                     return next(err);
 
+                params['Success'] = (params['Success'] === 'True')
                 runGenericActivities(params, next);
             });
         },
@@ -192,12 +193,57 @@ router.post('/heartbeat', function(req, res, errCallback){
         if (err)
             return errCallback(err);
 
-        res.send('done');
+        res.send('All good!');
     });
 });
 
-router.post('/speedtest', function(req, res){
-    res.send('Not yet implemented');
+router.post('/speedtest', function(req, res, errCallback){
+    var params = [
+        'MAC Address',
+        'API key',
+        'WAN IP',
+        'LAN IP',
+        'Speedtest server',
+        'Success',
+        'Error',
+        'Latency',
+        'Down',
+        'Up'
+    ];
+
+    async.waterfall([
+        function(next){
+            checkParams(req.body, params, function(err, params){
+                if (err)
+                    return next(err);
+
+                params['Success'] = (params['Success'] === 'True')
+                runGenericActivities(params, next);
+            });
+        },
+        function(params, device, next){
+            var speedTestParams = {
+                TimeStamp: Date.now(),
+                WanIP: params['WAN IP'],
+                LANIP: params['LAN IP'],
+                Server: params['Speedtest server'],
+                Success: params['Success'],
+                Error: params['Error'],
+                Latency: params['Latency'],
+                Down: params['Down'],
+                Up: params['Up']
+            };
+
+            SpeedTest.create(speedTestParams, function(err, newSpeedTest){
+                next(err);
+            });
+        }
+    ], function(err){
+        if (err)
+            return errCallback(err);
+
+        res.send('All good!');
+    });
 });
 
 router.get('/devices', function(req, res, errCallback){
@@ -246,7 +292,7 @@ router.get('/heartbeats', function(req, res, errCallback){
 });
 
 router.get('/speedtests', function(req, res, errCallback){
-    SpeedTests.find({}, function(err, speedtests){
+    SpeedTest.find({}, function(err, speedtests){
         if (err)
             errCallback(err);
 
