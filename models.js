@@ -43,13 +43,24 @@ var probeSchema = new Schema(
 	}
 );
 probeSchema.plugin(autoIncrement.plugin, {model: 'Probe', field: '_id'});
-probeSchema.methods.setUpState = function(callback){
+probeSchema.methods.setState = function(state, callback){
+	if (Object.prototype.toString.call(state) !== '[object String]')
+		return callback(new Error("setState method expects 'state' parameter to be a string"));
+
+	var stateLowercase = state.toLowerCase(),
+		stateCapitalized = state[0].toUpperCase() + stateLowercase.substring(1);
+
+	if (stateLowercase.localeCompare('up') != 0 &&
+		stateLowercase.localeCompare('down') != 0)
+		return callback(new Error("setState method expects 'state' parameter to be either 'up' or 'down'"));
+
 	var thisProbe = this;
-	thisProbe.State = 'Up';
+
+	thisProbe.State = stateCapitalized;
 
 	var newEventParams = {
 		Probe: thisProbe._id,
-		Type: 'probe.up'
+		Type: 'probe.' + stateLowercase
 	};
 
 	connection.model('Event', eventSchema).create(newEventParams, function(err){
@@ -69,53 +80,7 @@ probeSchema.methods.setUpState = function(callback){
 				var newStateParams = {
 					Probe: thisProbe._id,
 					Start: currentDate,
-					State: 'Up'
-				};
-
-				connection.model('State', stateSchema)
-						  .create(newStateParams, function(err, newState){
-						  	next(err, newState);
-						  });
-			},
-		], function(err, newState){
-			if (err)
-				return callback(err);
-
-			thisProbe.CurrentState = newState._id;
-			thisProbe.save(function(err){
-				return callback(err);
-			});
-		});
-	});
-};
-
-probeSchema.methods.setDownState = function(callback){
-	var thisProbe = this;
-	thisProbe.State = 'Down';
-
-	var newEventParams = {
-		Probe: thisProbe._id,
-		Type: 'probe.down'
-	};
-
-	connection.model('Event', eventSchema).create(newEventParams, function(err){
-		if (err)
-			return callback(err);
-
-		async.waterfall([
-			function(next){
-				var currentDate = Date.now();
-				connection.model('State', stateSchema)
-						  .findOneAndUpdate({_id: thisProbe.CurrentState}, {End: currentDate}, function(err){
-						  	next(err, currentDate);
-				});
-
-			},
-			function(currentDate, next){
-				var newStateParams = {
-					Probe: thisProbe._id,
-					Start: currentDate,
-					State: 'Down'
+					State: stateCapitalized
 				};
 
 				connection.model('State', stateSchema)

@@ -83,7 +83,7 @@ var runGenericActivities = function(params, callback){
                     ActiveDevice: newDevice._id,
                     State: 'New',
                     WanIP: params['WAN IP'],
-                    LANIP: params['LAN IP']
+                    LanIP: params['LAN IP']
                 };
 
                 Probe.create(newProbeParams, function(err, newProbe){
@@ -160,7 +160,7 @@ router.post('/heartbeat', function(req, res, errCallback){
             var heartbeatParams = {
                 TimeStamp: Date.now(),
                 WanIP: params['WAN IP'],
-                LANIP: params['LAN IP'],
+                LanIP: params['LAN IP'],
                 Server: params['Ping server'],
                 Success: params['Success'],
                 Error: params['Error'],
@@ -176,7 +176,7 @@ router.post('/heartbeat', function(req, res, errCallback){
                 foundProbe.LatestHeartbeat = Date.now();
                 foundProbe.NextHeartbeat = Date.now() + 1000 * 60 * params['Next heartbeat'];
                 foundProbe.WanIP = params['WAN IP'];
-                foundProbe.LANIP = params['LAN IP'];
+                foundProbe.LanIP = params['LAN IP'];
                 
                 foundProbe.save(function(err){
                     if (err)
@@ -186,7 +186,7 @@ router.post('/heartbeat', function(req, res, errCallback){
                 if (foundProbe.State.localeCompare('Up') == 0)
                     return next(null);
                 else
-                    foundProbe.setUpState(next);
+                    foundProbe.setState('Up', next);
             });
         }
     ], function(err){
@@ -225,7 +225,7 @@ router.post('/speedtest', function(req, res, errCallback){
             var speedTestParams = {
                 TimeStamp: Date.now(),
                 WanIP: params['WAN IP'],
-                LANIP: params['LAN IP'],
+                LanIP: params['LAN IP'],
                 Server: params['Speedtest server'],
                 Success: params['Success'],
                 Error: params['Error'],
