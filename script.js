@@ -3,8 +3,6 @@ require('waitjs');
 
 module.exports = function(){
     repeat('1 min', function() {
-        console.log('Running script');
-
         Probe.find({NextHeartbeat: {$lt: Date.now()}, State: 'Up'}, function(err, foundProbes){
             if (err)
                 return console.log(err);
