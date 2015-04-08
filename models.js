@@ -36,7 +36,7 @@ var probeSchema = new Schema(
 		LatestHeartbeat: Date,
 		NextHeartbeat: Date,
 		WanIP: String,
-		LANIP: String
+		LanIP: String
 	},
 	{
 		collection: 'Probes'
@@ -116,7 +116,7 @@ var eventSchema = new Schema(
 		_id: Number,
 		Probe: {type: Number, ref: 'Probe'},
 		Type: String,
-		TimeStamp: Date,
+		TimeStamp: {type: Date, default: Date.now},
 	},
 	{
 		collection: 'Events'
@@ -134,7 +134,7 @@ var heartbeatSchema = new Schema(
 		Probe: {type: Number, ref: 'Probe'},
 		TimeStamp: Date,
 		WanIP: String,
-		LANIP: String,
+		LanIP: String,
 		Server: String,
 		Success: Boolean,
 		Error: String,
@@ -156,7 +156,7 @@ var speedTestSchema= new Schema(
 		Probe: {type: Number, ref: 'Probe'},
 		TimeStamp: Date,
 		WanIP: String,
-		LANIP: String,
+		LanIP: String,
 		Server: String,
 		Success: Boolean,
 		Error: String,
