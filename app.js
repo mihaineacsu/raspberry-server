@@ -1,7 +1,8 @@
 var config = require('./config/config'),
     express = require('express'),
     bodyParser = require('body-parser');
-    routes = require('./routes');
+    routes = require('./routes'),
+    script = require('./script');
 
 var app = express();
 
@@ -28,3 +29,5 @@ app.use(function(err, req, res, next) {
 });
 
 app.listen(config.get('PORT'));
+
+script();

@@ -89,6 +89,52 @@ probeSchema.methods.setUpState = function(callback){
 	});
 };
 
+probeSchema.methods.setDownState = function(callback){
+	var thisProbe = this;
+	thisProbe.State = 'Down';
+
+	var newEventParams = {
+		Probe: thisProbe._id,
+		Type: 'probe.down'
+	};
+
+	connection.model('Event', eventSchema).create(newEventParams, function(err){
+		if (err)
+			return callback(err);
+
+		async.waterfall([
+			function(next){
+				var currentDate = Date.now();
+				connection.model('State', stateSchema)
+						  .findOneAndUpdate({_id: thisProbe.CurrentState}, {End: currentDate}, function(err){
+						  	next(err, currentDate);
+				});
+
+			},
+			function(currentDate, next){
+				var newStateParams = {
+					Probe: thisProbe._id,
+					Start: currentDate,
+					State: 'Down'
+				};
+
+				connection.model('State', stateSchema)
+						  .create(newStateParams, function(err, newState){
+						  	next(err, newState);
+						  });
+			},
+		], function(err, newState){
+			if (err)
+				return callback(err);
+
+			thisProbe.CurrentState = newState._id;
+			thisProbe.save(function(err){
+				return callback(err);
+			});
+		});
+	});
+};
+
 
 /*
  ** State schema
