@@ -26,7 +26,8 @@ app.use(function(err, req, res, next) {
     console.log(err);
 	res.status(500);
 	return res.send({
-        error: err.message
+        type: err.name,
+        message: err.message,
     });
 });
 
