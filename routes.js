@@ -152,7 +152,7 @@ router.post('/heartbeat', function(req, res, errCallback){
                 if (err)
                     return next(err);
 
-                params['Success'] = (params['Success'] === 'True')
+                params['Success'] = evalSuccess(params['Success']);
                 runGenericActivities(params, next);
             });
         },
@@ -173,6 +173,11 @@ router.post('/heartbeat', function(req, res, errCallback){
         },
         function(params, device, next){
             Probe.findOne({ActiveDevice: device._id}, function(err, foundProbe){
+                if (err)
+                    return next(err);
+                if (!foundProbe)
+                    return next(new Error('Missing probe for device with MAC ' + device.MAC));
+
                 foundProbe.LatestHeartbeat = Date.now();
                 foundProbe.NextHeartbeat = Date.now() + 1000 * 60 * params['Next heartbeat'];
                 foundProbe.WanIP = params['WAN IP'];
@@ -217,12 +222,23 @@ router.post('/speedtest', function(req, res, errCallback){
                 if (err)
                     return next(err);
 
-                params['Success'] = (params['Success'] === 'True')
+                params['Success'] = evalSuccess(params['Success']);
                 runGenericActivities(params, next);
             });
         },
         function(params, device, next){
+            Probe.findOne({ActiveDevice: device._id}, function(err, foundProbe){
+                if (err)
+                    return next(err);
+                if (!foundProbe)
+                    return next(new Error('Missing probe for device with MAC ' + device.MAC));
+
+                next(null, params, foundProbe);
+            });
+        },
+        function(params, probe, next){
             var speedTestParams = {
+                Probe: probe._id,
                 TimeStamp: Date.now(),
                 WanIP: params['WAN IP'],
                 LanIP: params['LAN IP'],
@@ -245,6 +261,10 @@ router.post('/speedtest', function(req, res, errCallback){
         res.send('All good!');
     });
 });
+
+function evalSuccess(value){
+    return (value.toLowerCase() === 'true');
+};
 
 router.get('/devices', function(req, res, errCallback){
     Device.find({}, function(err, devices){
