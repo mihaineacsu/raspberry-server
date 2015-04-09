@@ -25,7 +25,7 @@ deviceSchema.plugin(autoIncrement.plugin, {model: 'Device', field: '_id'});
 
 
 /*
- ** Device schema
+ ** Probe schema
  */
 var probeSchema = new Schema(
 	{
@@ -50,8 +50,8 @@ probeSchema.methods.setState = function(state, callback){
 	var stateLowercase = state.toLowerCase(),
 		stateCapitalized = state[0].toUpperCase() + stateLowercase.substring(1);
 
-	if (stateLowercase.localeCompare('up') != 0 &&
-		stateLowercase.localeCompare('down') != 0)
+	if ((stateLowercase.localeCompare('up') != 0) &&
+		(stateLowercase.localeCompare('down') != 0))
 		return callback(new Error("setState method expects 'state' parameter to be either 'up' or 'down'"));
 
 	var thisProbe = this;
