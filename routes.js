@@ -176,7 +176,8 @@ router.post('/heartbeat', function(req, res, errCallback){
                 if (err)
                     return next(err);
                 if (!foundProbe)
-                    return next(new Error('Missing probe for device with MAC ' + device.MAC));
+                    return next(new Error('Missing corresponding probe for device with MAC ' +
+                        device.MAC));
 
                 foundProbe.LatestHeartbeat = Date.now();
                 foundProbe.NextHeartbeat = Date.now() + 1000 * 60 * params['Next heartbeat'];
@@ -231,7 +232,8 @@ router.post('/speedtest', function(req, res, errCallback){
                 if (err)
                     return next(err);
                 if (!foundProbe)
-                    return next(new Error('Missing probe for device with MAC ' + device.MAC));
+                    return next(new Error('Missing corresponding probe for device with MAC ' +
+                        device.MAC));
 
                 next(null, params, foundProbe);
             });
