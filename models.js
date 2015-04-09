@@ -1,7 +1,9 @@
 var mongoose = require('mongoose'),
 	autoIncrement = require('mongoose-auto-increment'),
 	config = require('./config/config'),
-	async = require('async');
+	async = require('async'),
+	https = require('https'),
+	moment = require('moment-timezone');
 
 var connection = mongoose.createConnection(config.get('MONGOLAB_URI'));
 
@@ -134,7 +136,61 @@ var eventSchema = new Schema(
 	}
 );
 eventSchema.plugin(autoIncrement.plugin, {model: 'Event', field: '_id'});
+eventSchema.post('save', function(newEvent){
+	connection.model('Probe', probeSchema)
+		.findOne({_id: newEvent.Probe})
+		.lean()
+		.populate({path: 'ActiveDevice'})
+		.exec(function(err, probe){
+			var postData = JSON.stringify({
+				id: newEvent._id,
+				Probe: newEvent.Probe,
+				MAC: probe.ActiveDevice.MAC,
+				'Current state': probe.CurrentState,
+				WanIP: probe.WanIP,
+				LanIP: probe.LanIP,
+				Latest: amsterdamFormat(probe.LatestHeartbeat),
+				Next: amsterdamFormat(probe.NextHeartbeat),
+				Type: newEvent.Type,
+				TimeStamp: amsterdamFormat(newEvent.TimeStamp),
+				Email: 'mihai.mneacsu@gmail.com'
+			});
 
+			var headers = {
+				'Content-Type': 'application/x-www-form-urlencoded',
+				'Content-Length': postData.length
+			};
+
+			var options = {
+				host: 'zapier.com',
+				port: 443,
+				method: 'POST',
+				path: '/hooks/catch/b2kc2h/',
+				headers: headers
+			};
+
+			var responseData = '';
+			var req = https.request(options, function(response){
+				response.on('data', function(chunk){
+					responseData += chunk;
+				});
+
+				response.on('end', function(){
+					console.log('Response: ' + responseData);
+				});
+			});
+
+			req.on('error', function(e){
+				console.log('Get error on POST req: ' + e.message);
+			});
+			req.write(postData);
+			req.end();
+			console.log('Sent POST req');
+		});
+});
+function amsterdamFormat(timeString){
+	return moment(timeString).tz('Europe/Amsterdam').format('DD-MM-YYYY HH:mm');
+}
 
 /*
  ** Heartbeat schema
